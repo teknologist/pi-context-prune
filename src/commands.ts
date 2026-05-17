@@ -167,10 +167,17 @@ function pruneStatusLineDescription(config: ContextPruneConfig): string {
   return `Hide the prune footer status line and queued turn notifications. Currently ${base}.`;
 }
 
+function warningMessagesDescription(config: ContextPruneConfig): string {
+  if (config.hideWarningMessages) {
+    return "Hide pruner Warning notifications. Currently hidden; showing warnings is opt-in.";
+  }
+  return "Show pruner Warning notifications. Currently shown.";
+}
+
 const HELP_TEXT = `pruner — automatically summarizes tool-call outputs to keep context lean.
 
 Usage:
-  /pruner settings                         Interactive settings overlay
+  /pruner settings                         Interactive settings overlay (including opt-in Warning messages)
   /pruner on                               Enable context pruning
   /pruner off                              Disable context pruning
   /pruner status                           Show status, model, prune trigger, batching mode, and stats
@@ -397,6 +404,13 @@ export function registerCommands(
               description: pruneStatusLineDescription(config),
             },
             {
+              id: "hideWarningMessages",
+              label: "Hide warnings",
+              values: ["true", "false"],
+              currentValue: String(config.hideWarningMessages),
+              description: warningMessagesDescription(config),
+            },
+            {
               id: "pruneOn",
               label: "Prune trigger",
               values: PRUNE_ON_MODES.map((m) => m.value),
@@ -474,6 +488,12 @@ export function registerCommands(
               const statusLineItem = items.find((item) => item.id === "showPruneStatusLine");
               if (statusLineItem) {
                 statusLineItem.description = pruneStatusLineDescription(newConfig);
+              }
+            } else if (id === "hideWarningMessages") {
+              newConfig.hideWarningMessages = newValue === "true";
+              const warningItem = items.find((item) => item.id === "hideWarningMessages");
+              if (warningItem) {
+                warningItem.description = warningMessagesDescription(newConfig);
               }
             } else if (id === "pruneOn") {
               newConfig.pruneOn = newValue as ContextPruneConfig["pruneOn"];
@@ -573,7 +593,7 @@ export function registerCommands(
             ? `\n  --- summarizer ---\n  calls:       ${s.callCount}\n  input:       ${formatTokens(s.totalInputTokens)} tokens\n  output:      ${formatTokens(s.totalOutputTokens)} tokens\n  cost:        ${formatCost(s.totalCost)}`
             : "\n  (no summarizer calls yet)";
           ctx.ui.notify(
-            `pruner status:\n  enabled:  ${cfg.enabled}\n  model:    ${cfg.summarizerModel}\n  thinking: ${summarizerThinkingLabel(cfg.summarizerThinking)} (${cfg.summarizerThinking})\n  trigger:  ${mode}\n  batching: ${batchingModeLabel(cfg.batchingMode)} (${cfg.batchingMode})\n  status:   ${cfg.showPruneStatusLine ? "on" : "off"}\n  remind:   ${cfg.remindUnprunedCount ? "on" : "off"} (agentic-auto only)${statsLine}`,
+            `pruner status:\n  enabled:  ${cfg.enabled}\n  model:    ${cfg.summarizerModel}\n  thinking: ${summarizerThinkingLabel(cfg.summarizerThinking)} (${cfg.summarizerThinking})\n  trigger:  ${mode}\n  batching: ${batchingModeLabel(cfg.batchingMode)} (${cfg.batchingMode})\n  status:   ${cfg.showPruneStatusLine ? "on" : "off"}\n  warnings: ${cfg.hideWarningMessages ? "hidden" : "shown"}\n  remind:   ${cfg.remindUnprunedCount ? "on" : "off"} (agentic-auto only)${statsLine}`,
           );
           break;
         }

@@ -36,6 +36,7 @@ import {
 import { StatsAccumulator } from "./src/stats.js";
 import { registerContextPruneTool } from "./src/context-prune-tool.js";
 import { PruneFrontierTracker } from "./src/frontier.js";
+import { isHiddenWarningMessage } from "./src/warnings.js";
 
 export default function (pi: ExtensionAPI) {
   // Shared mutable config reference — updated by /pruner commands
@@ -71,6 +72,7 @@ export default function (pi: ExtensionAPI) {
   const errorMessage = (err: unknown) => (err instanceof Error ? err.message : String(err));
 
   const safeNotify = (ctx: any, message: string, type: "info" | "warning" | "error" = "info") => {
+    if (isHiddenWarningMessage(currentConfig.value, message, type)) return;
     try {
       ctx.ui.notify(message, type);
     } catch (err) {

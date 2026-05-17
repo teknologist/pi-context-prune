@@ -149,6 +149,8 @@ export interface ContextPruneConfig {
   enabled: boolean;
   /** Whether to show the prune footer status line and queued turn messages */
   showPruneStatusLine: boolean;
+  /** Whether to hide user-visible warning notifications from this extension */
+  hideWarningMessages: boolean;
   /**
    * Which model to use for summarization.
    * "default" = current active Pi model (ctx.model)
@@ -179,6 +181,7 @@ export interface ContextPruneConfig {
 export const DEFAULT_CONFIG: ContextPruneConfig = {
   enabled: false,
   showPruneStatusLine: true,
+  hideWarningMessages: true,
   summarizerModel: "default",
   summarizerThinking: "default",
   pruneOn: "agent-message",

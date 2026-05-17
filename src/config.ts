@@ -28,6 +28,10 @@ export async function loadConfig(): Promise<ContextPruneConfig> {
         typeof merged.showPruneStatusLine === "boolean"
           ? merged.showPruneStatusLine
           : DEFAULT_CONFIG.showPruneStatusLine,
+      hideWarningMessages:
+        typeof merged.hideWarningMessages === "boolean"
+          ? merged.hideWarningMessages
+          : DEFAULT_CONFIG.hideWarningMessages,
       pruneOn: isPruneOn(merged.pruneOn) ? merged.pruneOn : DEFAULT_CONFIG.pruneOn,
       summarizerThinking: isSummarizerThinking(merged.summarizerThinking)
         ? merged.summarizerThinking

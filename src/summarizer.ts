@@ -10,6 +10,7 @@ import type {
   SummarizeResult,
 } from "./types.js";
 import { serializeBatchForSummarizer } from "./batch-capture.js";
+import { notifyUnlessHidden } from "./warnings.js";
 
 const SYSTEM_PROMPT = `You are summarizing a batch of tool calls made by an AI coding assistant.
 For each tool call provide:
@@ -44,7 +45,9 @@ export function resolveModel(config: ContextPruneConfig, ctx: ExtensionContext):
 
   const slashIndex = config.summarizerModel.indexOf("/");
   if (slashIndex === -1) {
-    ctx.ui.notify(
+    notifyUnlessHidden(
+      ctx,
+      config,
       `pruner: invalid summarizerModel "${config.summarizerModel}", expected "provider/model-id". Falling back to default model.`,
       "warning"
     );
@@ -56,7 +59,9 @@ export function resolveModel(config: ContextPruneConfig, ctx: ExtensionContext):
 
   const found = ctx.modelRegistry.find(provider, modelId);
   if (!found) {
-    ctx.ui.notify(
+    notifyUnlessHidden(
+      ctx,
+      config,
       `pruner: model "${config.summarizerModel}" not found in registry. Falling back to default model.`,
       "warning"
     );

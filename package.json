@@ -1,11 +1,11 @@
 {
   "name": "pi-context-prune",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "description": "Pi extension package for pruning future context while preserving original tool-call history.",
   "type": "module",
   "scripts": {
     "build": "echo 'nothing to build'",
-    "check": "echo 'nothing to check'"
+    "check": "node --test test/*.test.ts"
   },
   "keywords": [
     "pi-package"
