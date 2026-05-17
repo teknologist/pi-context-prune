@@ -135,7 +135,7 @@ The extension registers the `/pruner` command:
 | `/pruner settings` | Opens an interactive settings overlay |
 | `/pruner on` | Enable pruning |
 | `/pruner off` | Disable pruning |
-| `/pruner status` | Show enabled state, summarizer model, thinking level, prune trigger, and cumulative stats |
+| `/pruner status` | Show enabled state, summarizer model, thinking level, prune trigger, warning visibility, and cumulative stats |
 | `/pruner model` | Show current summarizer model |
 | `/pruner model <id>` | Set summarizer model (e.g. `anthropic/claude-haiku-3-5`) |
 | `/pruner model <id>:<thinking>` | Set summarizer model and thinking together (e.g. `openai/gpt-5-mini:low`) |
@@ -150,13 +150,15 @@ The extension registers the `/pruner` command:
 
 ### Settings overlay
 
-`/pruner settings` opens a TUI overlay with five interactive items:
+`/pruner settings` opens a TUI overlay with seven interactive items:
 
 1. **Enabled** — toggle pruning on/off
 2. **Prune status line** — show or hide the footer status widget and queued turn notifications
-3. **Prune trigger** — cycle through all five `pruneOn` modes
-4. **Summarizer model** — press Enter to open a searchable submenu listing `"default"` plus all available models
-5. **Summarizer thinking** — cycle through the thinking/reasoning level used for summarizer calls
+3. **Hide warnings** — hide or show user-visible pruner warning notifications. This is `true` by default, so displaying `Warning:` messages is opt-in.
+4. **Prune trigger** — cycle through all five `pruneOn` modes
+5. **Summarizer model** — press Enter to open a searchable submenu listing `"default"` plus all available models
+6. **Summarizer thinking** — cycle through the thinking/reasoning level used for summarizer calls
+7. **Batching mode** — cycle between per-turn summaries and agent-message grouped summaries
 
 All changes are saved immediately to `~/.pi/agent/context-prune/settings.json` and reflected in the footer status widget when it is enabled.
 
@@ -193,10 +195,12 @@ Config is stored in `~/.pi/agent/context-prune/settings.json` (global, project-i
 {
   "enabled": false,
   "showPruneStatusLine": true,
+  "hideWarningMessages": true,
   "summarizerModel": "default",
   "summarizerThinking": "default",
   "pruneOn": "agent-message",
-  "remindUnprunedCount": true
+  "remindUnprunedCount": true,
+  "batchingMode": "turn"
 }
 ```
 
@@ -204,12 +208,15 @@ Config is stored in `~/.pi/agent/context-prune/settings.json` (global, project-i
 |---|---|---|
 | `enabled` | `true` / `false` | `false` |
 | `showPruneStatusLine` | `true` / `false` | `true` |
+| `hideWarningMessages` | `true` / `false` | `true` |
 | `summarizerModel` | `"default"` or `"provider/model-id"` | `"default"` |
 | `summarizerThinking` | `"default"`, `"off"`, `"minimal"`, `"low"`, `"medium"`, `"high"`, `"xhigh"` | `"default"` |
 | `pruneOn` | `"every-turn"`, `"on-context-tag"`, `"on-demand"`, `"agent-message"`, `"agentic-auto"` | `"agent-message"` |
 | `remindUnprunedCount` | `true` / `false` | `true` |
+| `batchingMode` | `"turn"` / `"agent-message"` | `"turn"` |
 
 - `showPruneStatusLine: true` keeps the prune footer widget and the automatic queued-turn notice visible. Turn it off if you want pruning to stay active without the extra status noise.
+- `hideWarningMessages: true` suppresses non-actionable pruner warning notifications, including messages formatted as `Warning: ...`. This is the default so warning output is opt-in; set it to `false` in `/pruner settings` when you want to see those warnings while debugging the extension.
 - `remindUnprunedCount: true` appends a small ephemeral `<pruner-note>` to the last tool result before each LLM call to remind the model of the number of unpruned tool calls in context. This only has an effect when `pruneOn` is set to `"agentic-auto"`.
 
 - `summarizerModel: "default"` means the current active Pi model. An explicit value like `"anthropic/claude-haiku-3-5"` uses that model for summarization (must be registered in Pi and have an API key).
